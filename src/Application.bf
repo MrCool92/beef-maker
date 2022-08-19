@@ -18,13 +18,14 @@ namespace BeefMaker
 			// Main Loop
 			while (!glfw.WindowShouldClose())
 			{
-				Glfw.PollEvents();
-
-				glfw.SwapBuffers();
+				glfw.BeginFrame();
+				glfw.PollEvents();
+				glfw.OnGUI();
+				glfw.EndFrame();
 			}
 
 			// Shutdown
-			glfw.Terminate();
+			glfw.Shutdown();
 
 			return .Ok;
 		}

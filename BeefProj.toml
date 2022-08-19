@@ -1,5 +1,5 @@
 FileVersion = 1
-Dependencies = {corlib = "*", GLFW = "*"}
+Dependencies = {corlib = "*", GLFW = "*", ImGuiImplGlfw = "*", ImGuiImplOpenGL3 = "*"}
 
 [Project]
 Name = "beef-maker"
