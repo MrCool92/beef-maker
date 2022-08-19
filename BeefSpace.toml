@@ -1,5 +1,5 @@
 FileVersion = 1
-Projects = {beef-maker = {Path = "."}}
+Projects = {beef-maker = {Path = "."}, GLFW = {Path = "vendor/glfw-beef"}}
 
 [Workspace]
 StartupProject = "beef-maker"

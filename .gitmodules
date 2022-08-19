@@ -1,0 +1,3 @@
+[submodule "vendor/glfw-beef"]
+	path = vendor/glfw-beef
+	url = https://github.com/MineGame159/glfw-beef
