@@ -1,0 +1,6 @@
+FileVersion = 1
+
+[Project]
+Name = "beef-maker"
+StartupObject = "BeefMaker.Program"
+DefaultNamespace = "BeefMaker"
