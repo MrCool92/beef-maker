@@ -4,44 +4,45 @@ using ImGui;
 
 namespace BeefMaker
 {
-	class GLFW
+	public class OpenGLRenderer : IRenderer
 	{
 		private static int windowWidth = 1280;
 		private static int windowHeight = 720;
 
 		private GlfwWindow* window;
-				private delegate void(GlfwWindow* window, int width, int height) framebufferResizeCallbackDelegate = new => FramebufferResizeCallback;
+		private delegate void(GlfwWindow* window, int width, int height) framebufferResizeCallbackDelegate = new => FramebufferResizeCallback;
 		private bool showDemoWindow = true;
 
 		private bool isQuitting;
 
-		public Result<void> Init()
+		public bool Init()
 		{
 			if (!Glfw.Init())
 			{
 				Console.WriteLine("Failed to initialized GLFW!");
-				return .Err;
+				return false;
 			}
 
 			int major = 0;
 			int minor = 0;
 			int rev = 0;
 			Glfw.GetVersion(ref major, ref minor, ref rev);
-			Console.WriteLine("Initialized GLFW {}.{}.{}", major, minor, rev);
+			Console.WriteLine($"Initialized GLFW {major}.{minor}.{rev}");
 
 			// Set error callback
-			Glfw.SetErrorCallback(new (error, description) => Console.WriteLine("Error {}: {}", error, description));
+			Glfw.SetErrorCallback(new (error, description) => Console.WriteLine($"Error {error}: {description}"));
 
 			// Get monitors
 			int monitorCount = 0;
 			GlfwMonitor** monitors = Glfw.GetMonitors(ref monitorCount);
 
-			for (int i < monitorCount) {
+			for (int i < monitorCount)
+			{
 				String name = scope .();
 				Glfw.GetMonitorName(monitors[i], name);
 
 				GlfwVideoMode* videoMode = Glfw.GetVideoMode(monitors[i]);
-				Console.WriteLine("Monitor {}: '{}' {}x{}", i, name, videoMode.width, videoMode.height);
+				Console.WriteLine($"Monitor {i}: '{name}' {videoMode.width}x{videoMode.height}");
 			}
 
 			// Set window hints and create window
@@ -49,24 +50,26 @@ namespace BeefMaker
 			Glfw.WindowHint(.ClientApi, Glfw.ClientApi.OpenGlApi);
 			Glfw.WindowHint(.ContextVersionMajor, 3);
 			Glfw.WindowHint(.ContextVersionMinor, 3);
+			//Glfw.WindowHint(. , true);
 
-			window = Glfw.CreateWindow(windowWidth, windowHeight, Application.windowTitle, null, null);
+			window = Glfw.CreateWindow(windowWidth, windowHeight, Engine.windowTitle, null, null);
 
 			Glfw.MakeContextCurrent(window);
 			GL.Init(=> Glfw.GetProcAddress);
 			Glfw.SetFramebufferSizeCallback(window, framebufferResizeCallbackDelegate);
 
 			// Set key callback
-			Glfw.SetKeyCallback(window, new (window, key, scancode, action, mods) => {
-				if (key == .Escape && action == .Press) Glfw.SetWindowShouldClose(window, true);
-			});
+			/*Glfw.SetKeyCallback(window, new (window, key, scancode, action, mods) => {
+				if (key == .Escape && action == .Press)
+					Glfw.SetWindowShouldClose(window, true);
+			});*/
 
 			// Show window
 			Glfw.ShowWindow(window);
 
 			InitImGUI();
 
-			return .Ok;
+			return true;
 		}
 
 		private void InitImGUI()
@@ -77,15 +80,13 @@ namespace BeefMaker
 			ImGui.IO* io = ImGui.GetIO();
 			io.DisplaySize = .(windowWidth, windowHeight);
 			io.DisplayFramebufferScale = .(1.0f, 1.0f);
-			io.ConfigFlags |= ImGui.ConfigFlags.NavEnableKeyboard;
-			io.ConfigFlags |= ImGui.ConfigFlags.DockingEnable;
-			io.ConfigFlags |= ImGui.ConfigFlags.ViewportsEnable;
+			io.ConfigFlags |= .NavEnableKeyboard | .DockingEnable | .ViewportsEnable;
 
 			ImGuiImplGlfw.InitForOpenGL(window, true);
 			ImGuiImplOpenGL3.Init("#version 130");
 		}
 
-		public void BeginFrame()
+		private void BeginFrame()
 		{
 			ClearColor(0.118f, 0.118f, 0.118f, 1f);
 
@@ -94,11 +95,11 @@ namespace BeefMaker
 			ImGui.NewFrame();
 		}
 
-		public void EndFrame()
+		private void EndFrame()
 		{
 			ImGui.Render();
 			ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
-			if(ImGui.GetIO().ConfigFlags & ImGui.ConfigFlags.ViewportsEnable != 0)
+			if (ImGui.GetIO().ConfigFlags & .ViewportsEnable != 0)
 			{
 				var mainWindowContext = window;
 				ImGui.UpdatePlatformWindows();
@@ -140,34 +141,45 @@ namespace BeefMaker
 			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
 		}
 
-		public void OnGUI()
+		public void Render()
 		{
+			BeginFrame();
+
 			DockSpace();
 
 			if (showDemoWindow)
 				ImGui.ShowDemoWindow(&showDemoWindow);
+
+			EndFrame();
 		}
 
 		private void DockSpace()
 		{
-			ImGui.WindowFlags windowFlags = .MenuBar | .NoDocking | .NoSavedSettings;
-			windowFlags |= .NoTitleBar | .NoCollapse | .NoResize |.NoMove;
-			windowFlags |= .NoBringToFrontOnFocus | .NoNavFocus;
+			ImGui.WindowFlags windowFlags =
+				.MenuBar | .NoDocking | .NoSavedSettings |
+				.NoTitleBar | .NoCollapse | .NoResize |
+				.NoMove | .NoBringToFrontOnFocus | .NoNavFocus;
 
-			var viewport = ImGui.GetMainViewport();
+			ImGui.Viewport* viewport = ImGui.GetMainViewport();
 			ImGui.SetNextWindowPos(viewport.WorkPos);
 			ImGui.SetNextWindowSize(viewport.WorkSize);
 			ImGui.SetNextWindowViewport(viewport.ID);
-			ImGui.PushStyleVar(.WindowRounding, 0.0f);
-			ImGui.PushStyleVar(.WindowBorderSize, 1.0f);
+			ImGui.PushStyleVar(.WindowRounding, 0f);
+			ImGui.PushStyleVar(.WindowBorderSize, 0);
+			ImGui.PushStyleVar(.FrameBorderSize, 0);
+			ImGui.PushStyleVar(.WindowPadding, .(0f, 0f));
 
-			ImGui.PushStyleVar(.WindowPadding, .(0.0f, 0.0f));
 			ImGui.Begin("MainViewport", null, windowFlags);
-			ImGui.PopStyleVar(3);
+			ImGui.PopStyleVar(4);
 
 			uint32 dockspaceId = ImGui.GetID("DockSpace");
-			ImGui.DockSpace(dockspaceId, .(0.0f, 0.0f), .None);
+			ImGui.DockSpace(dockspaceId, .(0f, 0f), .None);
+			MenuBar();
+			ImGui.End();
+		}
 
+		private void MenuBar()
+		{
 			if (ImGui.BeginMenuBar())
 			{
 			    if (ImGui.BeginMenu("File"))
@@ -181,12 +193,11 @@ namespace BeefMaker
 				}
 				ImGui.EndMenuBar();
 			}
-			ImGui.End();
 		}
 
 		private void FramebufferResizeCallback(GlfwWindow* window, int width, int height)
 		{
-			Console.WriteLine($"Resize event: {width}, {height}");
+			Render();
 		}
 	}
 }

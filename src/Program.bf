@@ -6,14 +6,11 @@ namespace BeefMaker
 	{
 		public static int Main(String[] args)
 		{
-			Application application = scope Application();
-			let result = application.Start();
-			switch (result)
-			{
-				case .Ok: Console.WriteLine("Application exited with joy C:");
-				case .Err: Console.WriteLine("Application exited with sadness :'(");
-			}
-			Console.Read();
+			Engine engine = scope Engine();
+			if (!engine.Init(args))
+				return 1;
+
+			engine.Run();
 			return 0;
 		}
 	}

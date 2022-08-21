@@ -1,5 +1,6 @@
 FileVersion = 1
 Projects = {beef-maker = {Path = "."}, GLFW = {Path = "vendor/glfw-beef"}, ImGuiImplGlfw = {Path = "vendor/imgui-beef/ImGuiImplGlfw"}, ImGui = {Path = "vendor/imgui-beef/ImGui"}, ImGuiImplOpenGL3 = {Path = "vendor/imgui-beef/ImGuiImplOpenGL3"}}
+Locked = ["GLFW", "ImGuiImplGlfw", "ImGui", "ImGuiImplOpenGL3"]
 
 [Workspace]
 StartupProject = "beef-maker"
