@@ -1,10 +1,11 @@
 namespace BeefMaker
 {
-	public interface IRenderer
+	public interface IPlatform
 	{
 		bool Init();
 		void PollEvents();
-		void Render();
+		void BeginGUI();
+		void EndGUI();
 		bool WindowShouldClose();
 		void Shutdown();
 	}
