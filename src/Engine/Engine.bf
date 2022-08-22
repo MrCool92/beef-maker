@@ -5,21 +5,31 @@ namespace BeefMaker
 	public class Engine
 	{
 		public static readonly String windowTitle = "Beef Maker";
+		private static bool isQuitting;
 
 		private Time time ~ delete _;
-		private IRenderer renderer ~ delete _;
+		private IPlatform platform ~ delete _;
+		private ModuleStack moduleStack ~ delete _;
 		private bool isRunning;
 
 		public bool Init(String[] args)
 		{
 			time = new Time();
-			renderer = new OpenGLRenderer();
+			platform = new OpenGLPlatform();
 
-			if (!renderer.Init())
+			if (!platform.Init())
 				return false;
+
+			moduleStack = new ModuleStack();
+			moduleStack.Push(new Editor());
 
 			isRunning = true;
 			return true;
+		}
+		
+		public ~this() 
+		{
+			platform.Shutdown();
 		}
 
 		public void Run()
@@ -29,38 +39,36 @@ namespace BeefMaker
 			{
 				time.Update();
 
-				renderer.PollEvents();
+				platform.PollEvents();
 
 				double currentDeltaTime = Time.deltaTime;
-				while (Time.time >= nextFixedTime)
+				while (Time.time + Time.epsilon >= nextFixedTime)
 				{
 					Time.[Friend]_deltaTime = Time.fixedTimestep;
-					FixedUpdate();
+					for (var m in moduleStack)
+						m.OnFixedUpdate();
+
 					nextFixedTime += Time.fixedTimestep;
 				}
 
 				Time.[Friend]_deltaTime = currentDeltaTime;
-				Update();
+				for (var m in moduleStack)
+					m.OnUpdate();
 
-				renderer.Render();
+				platform.BeginGUI();
 
-				isRunning = isRunning && !renderer.WindowShouldClose();
+				for (var m in moduleStack)
+					m.OnGUI();
+
+				platform.EndGUI();
+
+				isRunning = !isQuitting || (moduleStack.Count > 0 && !platform.WindowShouldClose());
 			}
 		}
 
-		private void FixedUpdate()
+		public static void Quit()
 		{
-			Console.WriteLine($"FixedUpdate: {Time.deltaTime}");
-		}
-
-		private void Update()
-		{
-			Console.WriteLine($"Update: {Time.deltaTime}");
-		}
-
-		public ~this() 
-		{
-			renderer.Shutdown();
+			isQuitting = true;
 		}
 	}
 }

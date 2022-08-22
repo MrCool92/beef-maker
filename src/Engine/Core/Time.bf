@@ -5,6 +5,8 @@ namespace BeefMaker
 {
 	public class Time
 	{
+		public static readonly double epsilon => 0.001;
+
 		private static double _fixedTimestep = 0.02;
 		public static double fixedTimestep
 		{

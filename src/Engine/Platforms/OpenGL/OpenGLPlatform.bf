@@ -4,16 +4,13 @@ using ImGui;
 
 namespace BeefMaker
 {
-	public class OpenGLRenderer : IRenderer
+	public class OpenGLPlatform : IPlatform
 	{
 		private static int windowWidth = 1280;
 		private static int windowHeight = 720;
 
 		private GlfwWindow* window;
 		private delegate void(GlfwWindow* window, int width, int height) framebufferResizeCallbackDelegate = new => FramebufferResizeCallback;
-		private bool showDemoWindow = true;
-
-		private bool isQuitting;
 
 		public bool Init()
 		{
@@ -50,7 +47,6 @@ namespace BeefMaker
 			Glfw.WindowHint(.ClientApi, Glfw.ClientApi.OpenGlApi);
 			Glfw.WindowHint(.ContextVersionMajor, 3);
 			Glfw.WindowHint(.ContextVersionMinor, 3);
-			//Glfw.WindowHint(. , true);
 
 			window = Glfw.CreateWindow(windowWidth, windowHeight, Engine.windowTitle, null, null);
 
@@ -86,25 +82,34 @@ namespace BeefMaker
 			ImGuiImplOpenGL3.Init("#version 130");
 		}
 
-		private void BeginFrame()
+		public void Shutdown()
 		{
-			ClearColor(0.118f, 0.118f, 0.118f, 1f);
+			ImGuiImplOpenGL3.Shutdown();
+			ImGuiImplGlfw.Shutdown();
+			ImGui.DestroyContext();
 
+			Glfw.DestroyWindow(window);
+			Glfw.Terminate();
+		}
+
+		public void BeginGUI()
+		{
+			//ClearColor(0.118f, 0.118f, 0.118f, 1f);
 			ImGuiImplOpenGL3.NewFrame();
 			ImGuiImplGlfw.NewFrame();
 			ImGui.NewFrame();
 		}
 
-		private void EndFrame()
+		public void EndGUI()
 		{
 			ImGui.Render();
 			ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
 			if (ImGui.GetIO().ConfigFlags & .ViewportsEnable != 0)
 			{
-				var mainWindowContext = window;
+				GlfwWindow* lastContext = Glfw.GetCurrentContext();
 				ImGui.UpdatePlatformWindows();
 				ImGui.RenderPlatformWindowsDefault();
-				Glfw.MakeContextCurrent(mainWindowContext);
+				Glfw.MakeContextCurrent(lastContext);
 			}
 			Glfw.SwapBuffers(window);
 		}
@@ -122,17 +127,7 @@ namespace BeefMaker
 
 		public bool WindowShouldClose()
 		{
-			return Glfw.WindowShouldClose(window) || isQuitting;
-		}
-
-		public void Shutdown()
-		{
-			ImGuiImplOpenGL3.Shutdown();
-			ImGuiImplGlfw.Shutdown();
-			ImGui.DestroyContext();
-
-			Glfw.DestroyWindow(window);
-			Glfw.Terminate();
+			return Glfw.WindowShouldClose(window);
 		}
 
 		public void ClearColor(float red, float green, float blue, float alpha)
@@ -141,63 +136,9 @@ namespace BeefMaker
 			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
 		}
 
-		public void Render()
-		{
-			BeginFrame();
-
-			DockSpace();
-
-			if (showDemoWindow)
-				ImGui.ShowDemoWindow(&showDemoWindow);
-
-			EndFrame();
-		}
-
-		private void DockSpace()
-		{
-			ImGui.WindowFlags windowFlags =
-				.MenuBar | .NoDocking | .NoSavedSettings |
-				.NoTitleBar | .NoCollapse | .NoResize |
-				.NoMove | .NoBringToFrontOnFocus | .NoNavFocus;
-
-			ImGui.Viewport* viewport = ImGui.GetMainViewport();
-			ImGui.SetNextWindowPos(viewport.WorkPos);
-			ImGui.SetNextWindowSize(viewport.WorkSize);
-			ImGui.SetNextWindowViewport(viewport.ID);
-			ImGui.PushStyleVar(.WindowRounding, 0f);
-			ImGui.PushStyleVar(.WindowBorderSize, 0);
-			ImGui.PushStyleVar(.FrameBorderSize, 0);
-			ImGui.PushStyleVar(.WindowPadding, .(0f, 0f));
-
-			ImGui.Begin("MainViewport", null, windowFlags);
-			ImGui.PopStyleVar(4);
-
-			uint32 dockspaceId = ImGui.GetID("DockSpace");
-			ImGui.DockSpace(dockspaceId, .(0f, 0f), .None);
-			MenuBar();
-			ImGui.End();
-		}
-
-		private void MenuBar()
-		{
-			if (ImGui.BeginMenuBar())
-			{
-			    if (ImGui.BeginMenu("File"))
-			    {
-					if (ImGui.MenuItem("Exit", "", false))
-					{
-						isQuitting = true;
-					}
-
-					ImGui.EndMenu();
-				}
-				ImGui.EndMenuBar();
-			}
-		}
-
 		private void FramebufferResizeCallback(GlfwWindow* window, int width, int height)
 		{
-			Render();
+			
 		}
 	}
 }
