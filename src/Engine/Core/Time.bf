@@ -7,27 +7,27 @@ namespace BeefMaker
 	{
 		public static readonly double epsilon => 0.001;
 
-		private static double _fixedTimestep = 0.02;
-		public static double fixedTimestep
+		private static double fixedTimestep = 0.02;
+		public static double FixedTimestep
 		{
-			[Inline] get => _fixedTimestep;
-			[Inline] set => _fixedTimestep = Math.[Inline]Max(0.01, value);
+			[Inline] get => fixedTimestep;
+			[Inline] set => fixedTimestep = Math.[Inline]Max(0.01, value);
 		}
 
-		private static double _unscaledTime;
-		[Inline] public static double unscaledTime => _unscaledTime;
+		private static double unscaledTime;
+		public static double UnscaledTime => unscaledTime;
 
-		private static double _time;
-		[Inline] public static double time => _time;
+		private static double time;
+		public static double Time => time;
 
-		private static double _deltaTime;
-		public static double deltaTime => _deltaTime;
+		private static double deltaTime;
+		public static double DeltaTime => deltaTime;
 
-		private static double _timeScale = 1.0;
- 		public static double timeScale
+		private static double timeScale = 1.0;
+ 		public static double TimeScale
 		{
-			[Inline] get => _timeScale;
-			[Inline] set => _timeScale = Math.[Inline]Max(0.01, value);
+			[Inline] get => timeScale;
+			[Inline] set => timeScale = Math.[Inline]Max(0.01, value);
 		}
 
 		private static double lastUnscaledTime;
@@ -43,11 +43,11 @@ namespace BeefMaker
 
 		public void Update()
 		{
-			lastUnscaledTime = _unscaledTime;
-			lastTime = _time;
-			_unscaledTime = stopwatch.ElapsedMilliseconds / 1000.0;
-			_deltaTime = (_unscaledTime - lastUnscaledTime) / _timeScale;
-			_time += _deltaTime;
+			lastUnscaledTime = unscaledTime;
+			lastTime = time;
+			unscaledTime = stopwatch.ElapsedMilliseconds / 1000.0;
+			deltaTime = (unscaledTime - lastUnscaledTime) / timeScale;
+			time += deltaTime;
 		}
 	}
 }

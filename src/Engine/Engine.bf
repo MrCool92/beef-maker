@@ -41,20 +41,21 @@ namespace BeefMaker
 
 				platform.PollEvents();
 
-				double currentDeltaTime = Time.deltaTime;
-				while (Time.time + Time.epsilon >= nextFixedTime)
+				double currentDeltaTime = Time.DeltaTime;
+				while (Time.Time + Time.epsilon >= nextFixedTime)
 				{
-					Time.[Friend]_deltaTime = Time.fixedTimestep;
+					Time.[Friend]deltaTime = Time.FixedTimestep;
 					for (var m in moduleStack)
 						m.OnFixedUpdate();
 
-					nextFixedTime += Time.fixedTimestep;
+					nextFixedTime += Time.FixedTimestep;
 				}
 
-				Time.[Friend]_deltaTime = currentDeltaTime;
+				Time.[Friend]deltaTime = currentDeltaTime;
 				for (var m in moduleStack)
 					m.OnUpdate();
 
+				GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
 				platform.BeginGUI();
 
 				for (var m in moduleStack)
@@ -62,7 +63,8 @@ namespace BeefMaker
 
 				platform.EndGUI();
 
-				isRunning = !isQuitting || (moduleStack.Count > 0 && !platform.WindowShouldClose());
+				bool shouldStopRunning = isQuitting || platform.WindowShouldClose();
+				isRunning = moduleStack.Count > 0 && !shouldStopRunning;
 			}
 		}
 

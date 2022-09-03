@@ -63,12 +63,12 @@ namespace BeefMaker
 			// Show window
 			Glfw.ShowWindow(window);
 
-			InitImGUI();
+			InitImGui();
 
 			return true;
 		}
 
-		private void InitImGUI()
+		private void InitImGui()
 		{
 			ImGui.CHECKVERSION();
 			ImGui.CreateContext();
@@ -77,6 +77,8 @@ namespace BeefMaker
 			io.DisplaySize = .(windowWidth, windowHeight);
 			io.DisplayFramebufferScale = .(1.0f, 1.0f);
 			io.ConfigFlags |= .NavEnableKeyboard | .DockingEnable | .ViewportsEnable;
+
+			io.Fonts.AddFontFromFileTTF("data/fonts/Roboto-Regular.ttf", 16);
 
 			ImGuiImplGlfw.InitForOpenGL(window, true);
 			ImGuiImplOpenGL3.Init("#version 130");
@@ -95,6 +97,7 @@ namespace BeefMaker
 		public void BeginGUI()
 		{
 			//ClearColor(0.118f, 0.118f, 0.118f, 1f);
+
 			ImGuiImplOpenGL3.NewFrame();
 			ImGuiImplGlfw.NewFrame();
 			ImGui.NewFrame();
