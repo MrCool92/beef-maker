@@ -55,5 +55,16 @@ namespace BeefMaker
 			GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, frameBuffer);
 			GL.glViewport(0, 0, width, height);
 		}
+
+		public void Unbind()
+		{
+			GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
+		}
+
+		public void Clear()
+		{
+			GL.glClearColor(0f, 0f, 0f, 1f);
+			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
+		}
 	}
 }

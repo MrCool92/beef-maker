@@ -4,15 +4,16 @@ using ImGui;
 
 namespace BeefMaker
 {
-	public class OpenGLPlatform : IPlatform
+	public class WindowsWindow : Window
 	{
 		private static int windowWidth = 1280;
 		private static int windowHeight = 720;
+		private static bool vsyncEnabled;
 
 		private GlfwWindow* window;
 		private delegate void(GlfwWindow* window, int width, int height) framebufferResizeCallbackDelegate = new => FramebufferResizeCallback;
 
-		public bool Init()
+		public override bool Init()
 		{
 			if (!Glfw.Init())
 			{
@@ -84,7 +85,7 @@ namespace BeefMaker
 			ImGuiImplOpenGL3.Init("#version 130");
 		}
 
-		public void Shutdown()
+		public override void Shutdown()
 		{
 			ImGuiImplOpenGL3.Shutdown();
 			ImGuiImplGlfw.Shutdown();
@@ -94,7 +95,7 @@ namespace BeefMaker
 			Glfw.Terminate();
 		}
 
-		public void BeginGUI()
+		public override void BeginGUI()
 		{
 			//ClearColor(0.118f, 0.118f, 0.118f, 1f);
 
@@ -103,7 +104,7 @@ namespace BeefMaker
 			ImGui.NewFrame();
 		}
 
-		public void EndGUI()
+		public override void EndGUI()
 		{
 			ImGui.Render();
 			ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
@@ -117,26 +118,36 @@ namespace BeefMaker
 			Glfw.SwapBuffers(window);
 		}
 
-		public void PollEvents()
+		public override void PollEvents()
 		{
 			Glfw.PollEvents();
 		}
 
-		public void GetWindowSize(out int width, out int height)
-		{
-			width = height = 0;
-			Glfw.GetWindowSize(window, ref width, ref height);
-		}
-
-		public bool WindowShouldClose()
+		public override bool WindowShouldClose()
 		{
 			return Glfw.WindowShouldClose(window);
+		}
+
+		public override void SetVSync(bool enabled)
+		{
+			if (enabled)
+				Glfw.SwapInterval(1);
+			else
+				Glfw.SwapInterval(0);
+
+			vsyncEnabled = enabled;
 		}
 
 		public void ClearColor(float red, float green, float blue, float alpha)
 		{
 			GL.glClearColor(red, green, blue, alpha);
 			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
+		}
+
+		public void GetWindowSize(out int width, out int height)
+		{
+			width = height = 0;
+			Glfw.GetWindowSize(window, ref width, ref height);
 		}
 
 		private void FramebufferResizeCallback(GlfwWindow* window, int width, int height)

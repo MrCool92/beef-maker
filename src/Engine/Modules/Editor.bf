@@ -1,6 +1,6 @@
-#pragma warning disable 168
 using ImGui;
 using System;
+using System.Diagnostics;
 
 namespace BeefMaker
 {
@@ -36,6 +36,8 @@ namespace BeefMaker
 			}
 		}
 
+		private float hue;
+
 		public override void OnEnable()
 		{
 			sceneRenderTexture = new RenderTexture(1024, 768);
@@ -65,16 +67,20 @@ namespace BeefMaker
 		public override void OnUpdate()
 		{
 			//Console.WriteLine($"Update: {Time.DeltaTime}");
-
-			GL.glClearColor(0.118f, 0.118f, 0.118f, 1f);
-			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
-
+			Clear();
+			
 			sceneRenderTexture.Bind();
-			GL.glClearColor(0f, 0f, 0f, 1f);
-			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
+			sceneRenderTexture.Clear();
+			shader.Bind();
 
-			shader.Use();
+			hue += 80 * (float)Time.DeltaTime;
+			int r, g, b;
+			Color.HsvToRgb(hue, 1, 1, out r, out g, out b);
+			shader.SetUniform4f("uColor", r / 255f, g / 255f, b / 255f, 1.0f);
 			mesh.Render();
+
+			shader.Unbind();
+			sceneRenderTexture.Unbind();
 		}
 
 		public override void OnGUI()
@@ -85,6 +91,12 @@ namespace BeefMaker
 				ImGui.ShowDemoWindow(&showDemoWindow);
 
 			GameWindow();
+		}
+
+		private void Clear()
+		{
+			GL.glClearColor(0.118f, 0.118f, 0.118f, 1f);
+			GL.glClear(GL.GL_COLOR_BUFFER_BIT);
 		}
 
 		private void DockSpace()
@@ -143,6 +155,34 @@ namespace BeefMaker
 			}
 			ImGui.End();
 			ImGui.PopStyleVar();
+		}
+
+		public static void GLClearError()
+		{
+			while (GL.glGetError() != GL.GL_NO_ERROR) {}
+		}
+
+		public static bool GLLogCall(
+			String file = Compiler.CallerFilePath,
+			String member = Compiler.CallerMemberName,
+			int line = Compiler.CallerLineNum)
+		{
+			let error = GL.glGetError();
+			if (error != GL.GL_NO_ERROR)
+			{
+				Console.WriteLine($"[OpenGL_Error] {error} in {file} at {member}:{line}");
+				return false;
+			}
+			return true;
+		}
+
+		public static void GLLogCall<T>(T x, String expr = Compiler.CallerExpression[0], String file = Compiler.CallerFileName, String member = Compiler.CallerMemberName, int line = Compiler.CallerLineNum)
+			where T : delegate void()
+		{
+			GLClearError();
+			x();
+			let error = GL.glGetError();
+			Debug.Assert(error == GL.GL_NO_ERROR, scope $"{expr} in {file} at {member}:{line}");
 		}
 	}
 }

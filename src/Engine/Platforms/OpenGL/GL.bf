@@ -2,7 +2,7 @@ using System;
 
 namespace BeefMaker
 {
-    class GL
+    public class GL
 	{
         public function void* GetProcAddressFunc(StringView procname);
 

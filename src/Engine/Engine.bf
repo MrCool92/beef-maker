@@ -8,16 +8,16 @@ namespace BeefMaker
 		private static bool isQuitting;
 
 		private Time time ~ delete _;
-		private IPlatform platform ~ delete _;
+		private Window window ~ delete _;
 		private ModuleStack moduleStack ~ delete _;
 		private bool isRunning;
 
 		public bool Init(String[] args)
 		{
 			time = new Time();
-			platform = new OpenGLPlatform();
+			window = new WindowsWindow();
 
-			if (!platform.Init())
+			if (!window.Init())
 				return false;
 
 			moduleStack = new ModuleStack();
@@ -29,7 +29,7 @@ namespace BeefMaker
 		
 		public ~this() 
 		{
-			platform.Shutdown();
+			window.Shutdown();
 		}
 
 		public void Run()
@@ -39,7 +39,7 @@ namespace BeefMaker
 			{
 				time.Update();
 
-				platform.PollEvents();
+				window.PollEvents();
 
 				double currentDeltaTime = Time.DeltaTime;
 				while (Time.Time + Time.epsilon >= nextFixedTime)
@@ -56,14 +56,14 @@ namespace BeefMaker
 					m.OnUpdate();
 
 				GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
-				platform.BeginGUI();
+				window.BeginGUI();
 
 				for (var m in moduleStack)
 					m.OnGUI();
 
-				platform.EndGUI();
+				window.EndGUI();
 
-				bool shouldStopRunning = isQuitting || platform.WindowShouldClose();
+				bool shouldStopRunning = isQuitting || window.WindowShouldClose();
 				isRunning = moduleStack.Count > 0 && !shouldStopRunning;
 			}
 		}
