@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", beef-maker-engine = "*"}
+
+[Project]
+Name = "beef-maker-editor"
+StartupObject = "BeefMakerEditor.Program"
+DefaultNamespace = "BeefMakerEditor"

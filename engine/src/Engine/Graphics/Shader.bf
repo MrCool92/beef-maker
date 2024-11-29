@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-namespace BeefMaker
+namespace BeefMakerEngine
 {
 	public class Shader
 	{

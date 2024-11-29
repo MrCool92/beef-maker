@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace BeefMaker
+namespace BeefMakerEngine
 {
 	public class ModuleStack : IEnumerable<Module>
 	{

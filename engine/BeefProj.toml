@@ -2,6 +2,5 @@ FileVersion = 1
 Dependencies = {corlib = "*", GLFW = "*", ImGuiImplGlfw = "*", ImGuiImplOpenGL3 = "*"}
 
 [Project]
-Name = "beef-maker"
-StartupObject = "BeefMaker.Program"
-DefaultNamespace = "BeefMaker"
+Name = "beef-maker-engine"
+DefaultNamespace = "BeefMakerEngine"

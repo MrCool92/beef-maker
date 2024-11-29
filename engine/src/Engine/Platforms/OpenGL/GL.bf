@@ -1,6 +1,6 @@
 using System;
 
-namespace BeefMaker
+namespace BeefMakerEngine
 {
     public class GL
 	{

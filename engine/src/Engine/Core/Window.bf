@@ -1,4 +1,4 @@
-namespace BeefMaker
+namespace BeefMakerEngine
 {
 	public abstract class Window
 	{

@@ -1,7 +1,7 @@
 using System;
 using ImGui;
 
-namespace BeefMaker
+namespace BeefMakerEngine
 {
 	public class RenderTexture
 	{
