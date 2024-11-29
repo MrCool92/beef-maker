@@ -121,6 +121,38 @@ namespace BeefMakerEngine
         public override void PollEvents()
         {
             Glfw.PollEvents();
+
+            for (var keyValue in Enum.GetValues(typeof(KeyCode)))
+            {
+                if (keyValue == -1)
+                    continue;
+
+                var action = GLFW.Glfw.GetKey(window, (GLFW.GlfwInput.Key)keyValue);
+                var currentState = Input.[Friend]GetKeyState((KeyCode)keyValue);
+
+                KeyState newState = .None;
+                switch (action)
+                {
+                case .Press,.Repeat:
+                    newState = (currentState == .None || currentState == .Released) ? .Pressed : .Held;
+
+                case .Release:
+                    newState = (currentState == .Pressed || currentState == .Held) ? .Released : .None;
+                }
+
+                Input.[Friend]SetKeyState((KeyCode)keyValue, newState);
+            }
+        }
+
+        public KeyState ActionToKeyState(GLFW.GlfwInput.Action action)
+        {
+            switch (action)
+            {
+            case .Press: return .Pressed;
+            case .Release: return .Released;
+            case .Repeat: return .Held;
+            default: return .None;
+            }
         }
 
         public override bool WindowShouldClose()

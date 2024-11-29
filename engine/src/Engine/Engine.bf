@@ -20,6 +20,8 @@ namespace BeefMakerEngine
             if (!window.Init())
                 return false;
 
+            Input.Initialize(window);
+
             moduleStack = new ModuleStack();
             for (var module in modules)
             {
@@ -44,7 +46,7 @@ namespace BeefMakerEngine
 
                 window.PollEvents();
 
-                double currentDeltaTime = Time.DeltaTime;
+                float currentDeltaTime = Time.DeltaTime;
                 while (Time.Time + Time.epsilon >= nextFixedTime)
                 {
                     Time.[Friend]deltaTime = Time.FixedTimestep;

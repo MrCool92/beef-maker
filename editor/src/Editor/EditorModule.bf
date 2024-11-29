@@ -1,45 +1,34 @@
 using ImGui;
 using System;
-using System.Diagnostics;
+using BeefMakerEngine;
 
-namespace BeefMakerEngine
+namespace BeefMakerEditor
 {
     public class EditorModule : Module
     {
         private bool showDemoWindow = true;
 
         private RenderTexture sceneRenderTexture ~ delete _;
-        private Mesh mesh ~ delete _;
+        private Mesh triangleMesh ~ delete _;
         private Shader shader ~ delete _;
+        private Camera camera ~ delete _;
 
-        public class Texture2D
-        {
-            private uint32 rendererId;
+        private Vector2 gameWindowSize;
+        private bool recreateRenderTexture;
 
-            this(int width, int height)
-            {
-                GL.glGenTextures(1, &rendererId);
-                GL.glBindTexture(GL.GL_TEXTURE_2D, rendererId);
-
-                GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB, width, height, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, null);
-
-                GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-                GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-
-                GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-                GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
-            }
-
-            ~this()
-            {
-                GL.glDeleteTextures(1, &rendererId);
-            }
-        }
+        public Event<delegate void()> OnGameWindowSizeChanged;
 
         private float hue;
+        private Box boxObject ~ delete _;
+
+        private GameView gameView;
+        private SceneView sceneView;
 
         public override void OnEnable()
         {
+            gameView = new GameView();
+            sceneView = new SceneView();
+
             sceneRenderTexture = new RenderTexture(1024, 768);
 
             var vertices = new float[3 * 3](
@@ -48,11 +37,22 @@ namespace BeefMakerEngine
                 0.0f,  0.5f, 0.0f
                 );
             var indicies = new uint32[3](0, 1, 2);
-            mesh = new Mesh(vertices, indicies);
+            triangleMesh = new Mesh(vertices, indicies);
             shader = new Shader("../data/shaders/basic.shader");
 
             ImGuiTheme.Init();
+
+            camera = new Camera(Vector3.zero, .(0, 0, 1), Vector3.up);
+            boxObject = new Box();
+            boxObject.position = .(0, 0, 10);
+
+            //OnGameWindowSizeChanged.Add(new => HandleGameWindowSizeChange);
         }
+
+        /*private void HandleGameWindowSizeChange()
+        {
+            
+        }*/
 
         public override void OnDisable()
         {
@@ -60,26 +60,73 @@ namespace BeefMakerEngine
 
         public override void OnFixedUpdate()
         {
-            //Console.WriteLine($"FixedUpdate: {Time.DeltaTime}");
         }
 
         public override void OnUpdate()
         {
-            //Console.WriteLine($"Update: {Time.DeltaTime}");
             Clear();
 
+            if (recreateRenderTexture)
+            {
+                recreateRenderTexture = false;
+                camera.aspectRatio = gameWindowSize.x / gameWindowSize.y;
+                delete sceneRenderTexture;
+                sceneRenderTexture = new RenderTexture((int)gameWindowSize.x, (int)gameWindowSize.y);
+            }
+
             sceneRenderTexture.Bind();
-            sceneRenderTexture.Clear();
-            shader.Bind();
+            defer sceneRenderTexture.Unbind();
 
-            hue += 80 * (float)Time.DeltaTime;
-            int r, g, b;
-            Color.HsvToRgb(hue, 1, 1, out r, out g, out b);
-            shader.SetUniform4f("uColor", r / 255f, g / 255f, b / 255f, 1.0f);
-            mesh.Render();
+            // Draw triangle on black background
+            /*{
+                sceneRenderTexture.Clear();
+                shader.Bind();
 
-            shader.Unbind();
-            sceneRenderTexture.Unbind();
+                hue += 80 * (float)Time.DeltaTime;
+                int r, g, b;
+                Color.HsvToRgb(hue, 1, 1, out r, out g, out b);
+                shader.SetUniform4f("uColor", r / 255f, g / 255f, b / 255f, 1.0f);
+                triangleMesh.Render();
+
+                shader.Unbind();
+            }*/
+
+            GL.glClearColor(1f, 1f, 1f, 1f);
+            GL.glClear(GL.GL_COLOR_BUFFER_BIT);
+            boxObject.Render(camera);
+
+            if (Input.GetKey(.W))
+                boxObject.Move(.(0, 1, 0));
+
+            if (Input.GetKey(.S))
+                boxObject.Move(.(0, -1, 0));
+
+            if (Input.GetKey(.A))
+                boxObject.Move(.(-1, 0, 0));
+
+            if (Input.GetKey(.D))
+                boxObject.Move(.(1, 0, 0));
+
+            if (Input.GetKey(.X))
+                boxObject.Move(.(0, 0, 1));
+
+            if (Input.GetKey(.Q))
+                camera.Move(.(0, 0, 1));
+
+            if (Input.GetKey(.E))
+                camera.Move(.(0, 0, -1));
+
+            if (Input.GetKey(.T))
+                camera.Move(.(0, 1, 0));
+
+            if (Input.GetKey(.G))
+                camera.Move(.(0, -1, 0));
+
+            if (Input.GetKey(.F))
+                camera.Move(.(-1, 0, 0));
+
+            if (Input.GetKey(.H))
+                camera.Move(.(1, 0, 0));
         }
 
         public override void OnGUI()
@@ -147,9 +194,17 @@ namespace BeefMakerEngine
             {
                 ImGui.BeginChild("GameRender");
                 {
-                    ImGui.Vec2 wsize = ImGui.GetWindowSize();
-                    ImGui.Image(sceneRenderTexture.TextureId, wsize, ImGui.Vec2(0, 1), ImGui.Vec2(1, 0));
+                    var windowSize = ImGui.GetWindowSize();
+                    ImGui.Image(sceneRenderTexture.TextureId, windowSize, ImGui.Vec2(0, 1), ImGui.Vec2(1, 0));
+
+                    if (gameWindowSize.x != windowSize.x || gameWindowSize.y != windowSize.y)
+                    {
+                        gameWindowSize = windowSize;
+                        recreateRenderTexture = true;
+                        OnGameWindowSizeChanged();
+                    }
                 }
+
                 ImGui.EndChild();
             }
             ImGui.End();
@@ -181,7 +236,7 @@ namespace BeefMakerEngine
             GLClearError();
             x();
             let error = GL.glGetError();
-            Debug.Assert(error == GL.GL_NO_ERROR, scope $"{expr} in {file} at {member}:{line}");
+            System.Diagnostics.Debug.Assert(error == GL.GL_NO_ERROR, scope $"{expr} in {file} at {member}:{line}");
         }
     }
 }
