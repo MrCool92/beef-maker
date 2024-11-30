@@ -79,6 +79,8 @@ namespace BeefMakerEngine
             io.DisplayFramebufferScale = .(1.0f, 1.0f);
             io.ConfigFlags |= .NavEnableKeyboard | .DockingEnable | .ViewportsEnable;
 
+            io.IniFilename = null;
+
             io.Fonts.AddFontFromFileTTF("../data/fonts/Roboto-Regular.ttf", 16);
 
             ImGuiImplGlfw.InitForOpenGL(window, true);
@@ -95,7 +97,7 @@ namespace BeefMakerEngine
             Glfw.Terminate();
         }
 
-        public override void BeginGUI()
+        public override void BeginImGUI()
         {
             //ClearColor(0.118f, 0.118f, 0.118f, 1f);
 
@@ -104,7 +106,7 @@ namespace BeefMakerEngine
             ImGui.NewFrame();
         }
 
-        public override void EndGUI()
+        public override void EndImGUI()
         {
             ImGui.Render();
             ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
@@ -127,7 +129,7 @@ namespace BeefMakerEngine
                 if (keyValue == -1)
                     continue;
 
-                var action = GLFW.Glfw.GetKey(window, (GLFW.GlfwInput.Key)keyValue);
+                var action = Glfw.GetKey(window, (GLFW.GlfwInput.Key)keyValue);
                 var currentState = Input.[Friend]GetKeyState((KeyCode)keyValue);
 
                 KeyState newState = .None;
@@ -155,18 +157,14 @@ namespace BeefMakerEngine
             }
         }
 
-        public override bool WindowShouldClose()
+        public override bool ShouldWindowClose()
         {
             return Glfw.WindowShouldClose(window);
         }
 
         public override void SetVSync(bool enabled)
         {
-            if (enabled)
-                Glfw.SwapInterval(1);
-            else
-                Glfw.SwapInterval(0);
-
+            Glfw.SwapInterval(enabled ? 1 : 0);
             vsyncEnabled = enabled;
         }
 

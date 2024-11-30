@@ -3,24 +3,24 @@ using System;
 
 namespace BeefMakerEditor
 {
-    public class EditorWindow
+    public abstract class EditorWindow
     {
-        protected String name ~ delete _;
+        protected String name;
 
         protected virtual void OnUpdate()
         {
         }
 
-        protected virtual void OnGUI()
+        protected virtual void OnImGUI()
         {
         }
 
-        private void GUI()
+        private void ImGUIInternal()
         {
             ImGui.PushStyleVar(.WindowPadding, .(2f, 2f));
             ImGui.Begin(name);
             {
-                OnGUI();
+                OnImGUI();
             }
             ImGui.End();
             ImGui.PopStyleVar();

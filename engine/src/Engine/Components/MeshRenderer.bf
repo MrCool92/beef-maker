@@ -1,15 +1,11 @@
 namespace BeefMakerEngine
 {
-    public class MeshRenderer
+    public class MeshRenderer : Component
     {
         public Matrix4x4 worldMatrix = Matrix4x4.identity;
 
         public Mesh mesh;
         public Material material;
-
-        public this()
-        {
-        }
 
         public void Render(Camera camera)
         {

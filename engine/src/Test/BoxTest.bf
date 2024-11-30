@@ -2,9 +2,12 @@ namespace BeefMakerEngine
 {
     public class Box
     {
+        public GameObject gameObject { get; private set; } ~ delete _;
+
         private Mesh mesh ~ delete _;
         private Material material ~ delete _;
-        private MeshRenderer meshRenderer ~ delete _;
+
+        private MeshRenderer meshRenderer;
 
         public Vector3 position
         {
@@ -14,6 +17,12 @@ namespace BeefMakerEngine
 
         public this()
         {
+            gameObject = GameObject.Insantiate("Box");
+            gameObject.transform.localPosition = .(0, 0, 10);
+
+            var child = GameObject.Insantiate("Child");
+            child.transform.SetParent(gameObject.transform);
+
             float[] vertices = new .( //
                 // Front face
                 -0.5f, -0.5f,  0.5f, // Bottom-left
@@ -59,7 +68,7 @@ namespace BeefMakerEngine
             var shader = new Shader("../data/shaders/default.shader");
             material = new Material(shader);
 
-            meshRenderer = new MeshRenderer();
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.mesh = mesh;
             meshRenderer.material = material;
         }

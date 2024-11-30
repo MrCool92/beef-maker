@@ -8,7 +8,7 @@ namespace BeefMakerEditor
 
         public this()
         {
-            name = "GameView";
+            name = "Game View";
 
             boxObject = new Box();
             boxObject.position = .(0, 0, 10);

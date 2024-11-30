@@ -3,7 +3,7 @@ using BeefMakerEngine;
 
 namespace BeefMakerEditor
 {
-    class Program
+    public class Program
     {
         public static int Main(String[] args)
         {

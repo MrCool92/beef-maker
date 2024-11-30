@@ -7,6 +7,6 @@ namespace BeefMakerEngine
         public virtual void OnFixedUpdate() { }
         public virtual void OnUpdate() { }
         public virtual void OnRender() { }
-        public virtual void OnGUI() { }
+        public virtual void OnImGUI() { }
     }
 }

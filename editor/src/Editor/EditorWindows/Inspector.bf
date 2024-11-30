@@ -11,7 +11,7 @@ namespace BeefMakerEditor
             name = "Inspector";
         }
 
-        protected override void OnGUI()
+        protected override void OnImGUI()
         {
         }
     }

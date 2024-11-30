@@ -17,10 +17,10 @@ namespace BeefMakerEditor
 
         public this()
         {
-            name = "SceneView";
+            name = "Scene View";
         }
 
-        private void Update()
+        private void UpdateInternal()
         {
             if (renderTexture == null || (lastWindowSize.x != windowSize.x || lastWindowSize.y != windowSize.y))
             {
@@ -32,7 +32,7 @@ namespace BeefMakerEditor
             OnUpdate();
         }
 
-        private void Render()
+        private void RenderInternal()
         {
             renderTexture.Bind();
             OnRender();
@@ -43,7 +43,7 @@ namespace BeefMakerEditor
         {
         }
 
-        protected override void OnGUI()
+        protected override void OnImGUI()
         {
             ImGui.BeginChild("Render");
             {

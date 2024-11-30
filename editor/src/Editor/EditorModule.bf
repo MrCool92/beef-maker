@@ -11,10 +11,13 @@ namespace BeefMakerEditor
 
         private Camera camera ~ delete _;
 
+        private Hierarchy hierarchy ~ delete _;
         private GameView gameView ~ delete _;
-        private Inspector inspector ~ delete _;
+        private Inspector inspector;
 
-        private List<EditorWindow> editorWindows;
+        private List<EditorWindow> editorWindows ~ delete _;
+
+        private static uint32 dockspaceId;
 
         public override void OnEnable()
         {
@@ -23,6 +26,9 @@ namespace BeefMakerEditor
             camera = new Camera(Vector3.zero, .(0, 0, 1), Vector3.up);
 
             editorWindows = new List<EditorWindow>();
+
+            hierarchy = new Hierarchy();
+            editorWindows.Add(hierarchy);
 
             gameView = new GameView();
             gameView.camera = camera;
@@ -42,15 +48,15 @@ namespace BeefMakerEditor
 
         public override void OnUpdate()
         {
-            gameView.[Friend]Update();
+            gameView.[Friend]UpdateInternal();
         }
 
         public override void OnRender()
         {
-            gameView.[Friend]Render();
+            gameView.[Friend]RenderInternal();
         }
 
-        public override void OnGUI()
+        public override void OnImGUI()
         {
             Clear();
 
@@ -59,8 +65,9 @@ namespace BeefMakerEditor
             if (showDemoWindow)
                 ImGui.ShowDemoWindow(&showDemoWindow);
 
-            gameView.[Friend]GUI();
-            inspector.[Friend]GUI();
+            hierarchy.[Friend]ImGUIInternal();
+            gameView.[Friend]ImGUIInternal();
+            inspector.[Friend]ImGUIInternal();
         }
 
         private void Clear()
@@ -86,11 +93,37 @@ namespace BeefMakerEditor
             ImGui.PushStyleVar(.WindowPadding, .(0f, 0f));
 
             ImGui.Begin("MainViewport", null, windowFlags);
-            ImGui.PopStyleVar(4);
+            {
+                ImGui.PopStyleVar(4);
 
-            uint32 dockspaceId = ImGui.GetID("DockSpace");
-            ImGui.DockSpace(dockspaceId, .(0f, 0f), .None);
-            MenuBar();
+                dockspaceId = ImGui.GetID("DockSpace");
+                ImGui.DockSpace(dockspaceId, .(0f, 0f), .None);
+                MenuBar();
+
+                static bool firstTime = true;
+                if (firstTime)
+                {
+                    firstTime = false;
+
+                    var size = ImGui.GetWindowSize();
+
+                    // Split the dockspace into regions
+                    ImGui.ID leftDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Left, 0.5f, ?, out dockspaceId);
+                    ImGui.ID rightDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Right, 0.5f, ?, out dockspaceId);
+
+                    // Dock windows to specific regions
+                    ImGui.DockBuilderDockWindow("Scene Hierarchy", leftDockId);
+                    ImGui.DockBuilderDockWindow("Inspector", rightDockId);
+                    ImGui.DockBuilderDockWindow("Dear ImGui Demo", rightDockId);
+                    ImGui.DockBuilderDockWindow("Game View", dockspaceId);
+
+                    ImGui.DockBuilderSetNodeSize(leftDockId, .(size.x * 0.2f, size.y));
+                    ImGui.DockBuilderSetNodeSize(rightDockId, .(size.x * 0.2f, size.y));
+
+                    // Finalize the dock layout
+                    ImGui.DockBuilderFinish(dockspaceId);
+                }
+            }
             ImGui.End();
         }
 

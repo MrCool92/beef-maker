@@ -17,10 +17,11 @@ namespace BeefMakerEngine
             time = new Time();
             window = new WindowsWindow();
 
-            if (!window.Init())
+            if (!window.Initialize())
                 return false;
 
             Input.Initialize(window);
+            SceneManager.Initialize();
 
             moduleStack = new ModuleStack();
             for (var module in modules)
@@ -57,21 +58,21 @@ namespace BeefMakerEngine
                 }
 
                 Time.[Friend]deltaTime = currentDeltaTime;
-                for (var m in moduleStack)
-                    m.OnUpdate();
+                for (var module in moduleStack)
+                    module.OnUpdate();
 
-                for (var m in moduleStack)
-                    m.OnRender();
+                for (var module in moduleStack)
+                    module.OnRender();
 
                 GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
-                window.BeginGUI();
+                window.BeginImGUI();
 
-                for (var m in moduleStack)
-                    m.OnGUI();
+                for (var module in moduleStack)
+                    module.OnImGUI();
 
-                window.EndGUI();
+                window.EndImGUI();
 
-                bool shouldStopRunning = isQuitting || window.WindowShouldClose();
+                bool shouldStopRunning = isQuitting || window.ShouldWindowClose();
                 isRunning = moduleStack.Count > 0 && !shouldStopRunning;
             }
         }
