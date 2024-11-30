@@ -75,5 +75,6 @@ namespace BeefMakerEngine
         public static operator float*(ref Vector2 a) => &a.x;
 
         public static operator Vector2(ref ImGui.ImGui.Vec2 a) => .(a.x, a.y);
+        public static operator ImGui.ImGui.Vec2(ref Vector2 a) => .(a.x, a.y);
     }
 }

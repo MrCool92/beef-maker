@@ -60,6 +60,9 @@ namespace BeefMakerEngine
                 for (var m in moduleStack)
                     m.OnUpdate();
 
+                for (var m in moduleStack)
+                    m.OnRender();
+
                 GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
                 window.BeginGUI();
 

@@ -1,5 +1,6 @@
 using ImGui;
 using System;
+using System.Collections;
 using BeefMakerEngine;
 
 namespace BeefMakerEditor
@@ -8,51 +9,28 @@ namespace BeefMakerEditor
     {
         private bool showDemoWindow = true;
 
-        private RenderTexture sceneRenderTexture ~ delete _;
-        private Mesh triangleMesh ~ delete _;
-        private Shader shader ~ delete _;
         private Camera camera ~ delete _;
 
-        private Vector2 gameWindowSize;
-        private bool recreateRenderTexture;
+        private GameView gameView ~ delete _;
+        private Inspector inspector ~ delete _;
 
-        public Event<delegate void()> OnGameWindowSizeChanged;
-
-        private float hue;
-        private Box boxObject ~ delete _;
-
-        private GameView gameView;
-        private SceneView sceneView;
+        private List<EditorWindow> editorWindows;
 
         public override void OnEnable()
         {
-            gameView = new GameView();
-            sceneView = new SceneView();
-
-            sceneRenderTexture = new RenderTexture(1024, 768);
-
-            var vertices = new float[3 * 3](
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.0f,  0.5f, 0.0f
-                );
-            var indicies = new uint32[3](0, 1, 2);
-            triangleMesh = new Mesh(vertices, indicies);
-            shader = new Shader("../data/shaders/basic.shader");
-
             ImGuiTheme.Init();
 
             camera = new Camera(Vector3.zero, .(0, 0, 1), Vector3.up);
-            boxObject = new Box();
-            boxObject.position = .(0, 0, 10);
 
-            //OnGameWindowSizeChanged.Add(new => HandleGameWindowSizeChange);
+            editorWindows = new List<EditorWindow>();
+
+            gameView = new GameView();
+            gameView.camera = camera;
+            editorWindows.Add(gameView);
+
+            inspector = new Inspector();
+            editorWindows.Add(inspector);
         }
-
-        /*private void HandleGameWindowSizeChange()
-        {
-            
-        }*/
 
         public override void OnDisable()
         {
@@ -64,79 +42,25 @@ namespace BeefMakerEditor
 
         public override void OnUpdate()
         {
-            Clear();
+            gameView.[Friend]Update();
+        }
 
-            if (recreateRenderTexture)
-            {
-                recreateRenderTexture = false;
-                camera.aspectRatio = gameWindowSize.x / gameWindowSize.y;
-                delete sceneRenderTexture;
-                sceneRenderTexture = new RenderTexture((int)gameWindowSize.x, (int)gameWindowSize.y);
-            }
-
-            sceneRenderTexture.Bind();
-            defer sceneRenderTexture.Unbind();
-
-            // Draw triangle on black background
-            /*{
-                sceneRenderTexture.Clear();
-                shader.Bind();
-
-                hue += 80 * (float)Time.DeltaTime;
-                int r, g, b;
-                Color.HsvToRgb(hue, 1, 1, out r, out g, out b);
-                shader.SetUniform4f("uColor", r / 255f, g / 255f, b / 255f, 1.0f);
-                triangleMesh.Render();
-
-                shader.Unbind();
-            }*/
-
-            GL.glClearColor(1f, 1f, 1f, 1f);
-            GL.glClear(GL.GL_COLOR_BUFFER_BIT);
-            boxObject.Render(camera);
-
-            if (Input.GetKey(.W))
-                boxObject.Move(.(0, 1, 0));
-
-            if (Input.GetKey(.S))
-                boxObject.Move(.(0, -1, 0));
-
-            if (Input.GetKey(.A))
-                boxObject.Move(.(-1, 0, 0));
-
-            if (Input.GetKey(.D))
-                boxObject.Move(.(1, 0, 0));
-
-            if (Input.GetKey(.X))
-                boxObject.Move(.(0, 0, 1));
-
-            if (Input.GetKey(.Q))
-                camera.Move(.(0, 0, 1));
-
-            if (Input.GetKey(.E))
-                camera.Move(.(0, 0, -1));
-
-            if (Input.GetKey(.T))
-                camera.Move(.(0, 1, 0));
-
-            if (Input.GetKey(.G))
-                camera.Move(.(0, -1, 0));
-
-            if (Input.GetKey(.F))
-                camera.Move(.(-1, 0, 0));
-
-            if (Input.GetKey(.H))
-                camera.Move(.(1, 0, 0));
+        public override void OnRender()
+        {
+            gameView.[Friend]Render();
         }
 
         public override void OnGUI()
         {
+            Clear();
+
             DockSpace();
 
             if (showDemoWindow)
                 ImGui.ShowDemoWindow(&showDemoWindow);
 
-            GameWindow();
+            gameView.[Friend]GUI();
+            inspector.[Friend]GUI();
         }
 
         private void Clear()
@@ -187,39 +111,12 @@ namespace BeefMakerEditor
             }
         }
 
-        private void GameWindow()
-        {
-            ImGui.PushStyleVar(.WindowPadding, .(2f, 2f));
-            ImGui.Begin("GameWindow");
-            {
-                ImGui.BeginChild("GameRender");
-                {
-                    var windowSize = ImGui.GetWindowSize();
-                    ImGui.Image(sceneRenderTexture.TextureId, windowSize, ImGui.Vec2(0, 1), ImGui.Vec2(1, 0));
-
-                    if (gameWindowSize.x != windowSize.x || gameWindowSize.y != windowSize.y)
-                    {
-                        gameWindowSize = windowSize;
-                        recreateRenderTexture = true;
-                        OnGameWindowSizeChanged();
-                    }
-                }
-
-                ImGui.EndChild();
-            }
-            ImGui.End();
-            ImGui.PopStyleVar();
-        }
-
         public static void GLClearError()
         {
             while (GL.glGetError() != GL.GL_NO_ERROR) { }
         }
 
-        public static bool GLLogCall(
-            String file = Compiler.CallerFilePath,
-            String member = Compiler.CallerMemberName,
-            int line = Compiler.CallerLineNum)
+        public static bool GLLogCall(String file = Compiler.CallerFilePath, String member = Compiler.CallerMemberName, int line = Compiler.CallerLineNum)
         {
             let error = GL.glGetError();
             if (error != GL.GL_NO_ERROR)
