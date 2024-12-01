@@ -1,11 +1,13 @@
+using ImGui;
+
 namespace BeefMakerEngine
 {
     public class MeshRenderer : Component
     {
-        public Matrix4x4 worldMatrix = Matrix4x4.identity;
-
         public Mesh mesh;
         public Material material;
+
+        public Color color;
 
         public void Render(Camera camera)
         {
@@ -13,14 +15,26 @@ namespace BeefMakerEngine
             material.shader.Bind();
 
             // Set the model, view, and projection matrices
-            material.SetMatrix4x4("model", worldMatrix);
+            material.SetMatrix4x4("model", gameObject.transform.localToWorld);
             material.SetMatrix4x4("view", camera.GetViewMatrix());
             material.SetMatrix4x4("projection", camera.GetProjectionMatrix());
-            material.SetColor4("tint", .(1, 0, 0, 1));
+            material.SetColor4("tint", color);
 
             mesh.Render();
 
             material.shader.Unbind();
+        }
+
+        public override void OnImGui()
+        {
+            // Color
+            ImGui.PushID("Color");
+            float[4] color = this.color;
+            if (ImGui.ColorEdit4("Color", color))
+            {
+                this.color = color;
+            }
+            ImGui.PopID();
         }
     }
 }

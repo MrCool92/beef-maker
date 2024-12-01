@@ -5,14 +5,17 @@ using System.Collections;
 
 namespace BeefMakerEditor
 {
+    public static class Selection
+    {
+        public static List<GameObject> selected = new .() ~ delete _;
+    }
+
     public class Hierarchy : EditorWindow
     {
         public this()
         {
             name = "Scene Hierarchy";
         }
-
-        private HashSet<GameObject> selected = new .() ~ delete _;
 
         protected override void OnImGUI()
         {
@@ -31,7 +34,7 @@ namespace BeefMakerEditor
 
             var nodeFlags = treeNodeFlags;
 
-            if (selected.Contains(gameObject))
+            if (Selection.selected.Contains(gameObject))
                 nodeFlags |= .Selected;
 
             ImGui.PushID(scope String(gameObject.GetHashCode()));
@@ -40,9 +43,9 @@ namespace BeefMakerEditor
             if (ImGui.IsItemClicked())
             {
                 if (!ImGui.GetKeyData(.ModShift).Down)
-                    selected.Clear();
+                    Selection.selected.Clear();
 
-                selected.Add(gameObject);
+                Selection.selected.Add(gameObject);
             }
 
             if (opened)

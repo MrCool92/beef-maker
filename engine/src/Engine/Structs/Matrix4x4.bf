@@ -248,30 +248,97 @@ namespace BeefMakerEngine
             m32 = translation.z;
         }
 
+        public Quaternion GetRotation()
+        {
+            Vector3 right   = new Vector3(m00, m10, m20).normalized;
+            Vector3 up      = new Vector3(m01, m11, m21).normalized;
+            Vector3 forward = new Vector3(m02, m12, m22).normalized;
+
+            Matrix4x4 rotationMatrix = .(
+                right.x, up.x, forward.x, 0,
+                right.y, up.y, forward.y, 0,
+                right.z, up.z, forward.z, 0,
+                0, 0, 0, 1
+                );
+
+            return Quaternion.FromMatrix(rotationMatrix);
+        }
+
+        public void SetRotation(Quaternion rotation) mut
+        {
+            float xx = rotation.x * rotation.x;
+            float yy = rotation.y * rotation.y;
+            float zz = rotation.z * rotation.z;
+            float xy = rotation.x * rotation.y;
+            float xz = rotation.x * rotation.z;
+            float yz = rotation.y * rotation.z;
+            float wx = rotation.w * rotation.x;
+            float wy = rotation.w * rotation.y;
+            float wz = rotation.w * rotation.z;
+
+            m00 = 1 - 2 * (yy + zz);
+            m01 = 2 * (xy - wz);
+            m02 = 2 * (xz + wy);
+
+            m10 = 2 * (xy + wz);
+            m11 = 1 - 2 * (xx + zz);
+            m12 = 2 * (yz - wx);
+
+            m20 = 2 * (xz - wy);
+            m21 = 2 * (yz + wx);
+            m22 = 1 - 2 * (xx + yy);
+        }
+
+        public Vector3 GetScale()
+        {
+            float scaleX = Math.Sqrt(m00 * m00 + m01 * m01 + m02 * m02);
+            float scaleY = Math.Sqrt(m10 * m10 + m11 * m11 + m12 * m12);
+            float scaleZ = Math.Sqrt(m20 * m20 + m21 * m21 + m22 * m22);
+
+            return .(scaleX, scaleY, scaleZ);
+        }
+
+        public void SetScale(Vector3 scale) mut
+        {
+            Vector3 column0 = .(m00, m01, m02).normalized;
+            Vector3 column1 = .(m10, m11, m12).normalized;
+            Vector3 column2 = .(m20, m21, m22).normalized;
+
+            // Apply the new scale
+            column0 *= scale.x;
+            column1 *= scale.y;
+            column2 *= scale.z;
+
+            // Set the new basis vectors back to the matrix
+            m00 = column0.x; m01 = column0.y; m02 = column0.z;
+            m10 = column1.x; m11 = column1.y; m12 = column1.z;
+            m20 = column2.x; m21 = column2.y; m22 = column2.z;
+        }
+
         public static Matrix4x4 LookAt(Vector3 position, Vector3 target, Vector3 up)
         {
             Vector3 forward = (target - position).normalized;
             Vector3 right = Vector3.Cross(up, forward).normalized;
             Vector3 newUp = Vector3.Cross(forward, right);
 
-            Matrix4x4 result = default;
-            result.m00 = right.x;
-            result.m01 = newUp.x;
-            result.m02 = forward.x;
-            result.m03 = 0f;
-            result.m10 = right.y;
-            result.m11 = newUp.y;
-            result.m12 = forward.y;
-            result.m13 = 0f;
-            result.m20 = right.z;
-            result.m21 = newUp.z;
-            result.m22 = forward.z;
-            result.m23 = 0f;
-            result.m30 = -Vector3.Dot(right, position);
-            result.m31 = -Vector3.Dot(newUp, position);
-            result.m32 = -Vector3.Dot(forward, position);
-            result.m33 = 1f;
-            return result;
+            Matrix4x4 m = default;
+            m.m00 = right.x;
+            m.m01 = newUp.x;
+            m.m02 = forward.x;
+            m.m03 = 0f;
+            m.m10 = right.y;
+            m.m11 = newUp.y;
+            m.m12 = forward.y;
+            m.m13 = 0f;
+            m.m20 = right.z;
+            m.m21 = newUp.z;
+            m.m22 = forward.z;
+            m.m23 = 0f;
+            m.m30 = -Vector3.Dot(right, position);
+            m.m31 = -Vector3.Dot(newUp, position);
+            m.m32 = -Vector3.Dot(forward, position);
+            m.m33 = 1f;
+            return m;
         }
 
         public static Matrix4x4 Perspective(float fovY, float aspect, float near, float far)
@@ -283,22 +350,22 @@ namespace BeefMakerEngine
 
             float tanHalfFovy = System.Math.Tan(fovY / 2.0f);
 
-            Matrix4x4 result = default;
+            Matrix4x4 m = default;
 
-            result.m00 = 1 / (aspect * tanHalfFovy);
-            result.m01 = result.m02 = result.m03 = 0;
+            m.m00 = 1 / (aspect * tanHalfFovy);
+            m.m01 = m.m02 = m.m03 = 0;
 
-            result.m11 = 1 / tanHalfFovy;
-            result.m10 = result.m12 = result.m13 = 0;
+            m.m11 = 1 / tanHalfFovy;
+            m.m10 = m.m12 = m.m13 = 0;
 
-            result.m20 = result.m21 = 0;
-            result.m22 = -(far + near) / (far - near);
-            result.m23 = 1;
+            m.m20 = m.m21 = 0;
+            m.m22 = -(far + near) / (far - near);
+            m.m23 = 1;
 
-            result.m30 = result.m31 = result.m33 = 0;
-            result.m32 = (2 * far * near) / (far - near);
+            m.m30 = m.m31 = m.m33 = 0;
+            m.m32 = (2 * far * near) / (far - near);
 
-            return result;
+            return m;
         }
 
         public override void ToString(String strBuffer)
@@ -307,5 +374,28 @@ namespace BeefMakerEngine
         }
 
         public static operator float*(ref Matrix4x4 matrix) => &matrix.m[0];
+
+        public static Matrix4x4 TRS(Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            Matrix4x4 m = rotation.ToMatrix4x4();
+
+            m.m00 *= scale.x;
+            m.m01 *= scale.x;
+            m.m02 *= scale.x;
+
+            m.m10 *= scale.y;
+            m.m11 *= scale.y;
+            m.m12 *= scale.y;
+
+            m.m20 *= scale.z;
+            m.m21 *= scale.z;
+            m.m22 *= scale.z;
+
+            m.m30 = position.x;
+            m.m31 = position.y;
+            m.m32 = position.z;
+
+            return m;
+        }
     }
 }

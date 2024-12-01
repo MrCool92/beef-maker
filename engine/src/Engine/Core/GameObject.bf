@@ -17,10 +17,17 @@ namespace BeefMakerEngine
 
         private static int nextId;
 
-        public static GameObject Insantiate(String name = "GameObject")
+        public static GameObject Instantiate(String name = "GameObject", Scene scene = null)
         {
             var gameObject = new GameObject(name);
-            SceneManager.activeScene.MoveGameObject(gameObject);
+            if (scene == null)
+            {
+                SceneManager.activeScene.MoveGameObject(gameObject);
+            }
+            else
+            {
+                scene.MoveGameObject(gameObject);
+            }
             return gameObject;
         }
 

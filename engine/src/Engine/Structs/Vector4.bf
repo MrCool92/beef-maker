@@ -2,6 +2,7 @@ using System;
 
 namespace BeefMakerEngine
 {
+    [UnderlyingArray(typeof(float), 4, true)]
     public struct Vector4
     {
         public readonly static Vector4 zero = .(0f,  0f,  0f, 0f);
@@ -12,7 +13,7 @@ namespace BeefMakerEngine
         public float z;
         public float w;
 
-        public this(float x, float y, float z, float w)
+        [Inline] public this(float x, float y, float z, float w)
         {
             this.x = x;
             this.y = y;
@@ -20,7 +21,7 @@ namespace BeefMakerEngine
             this.w = w;
         }
 
-        public this(float x, float y, float z)
+        [Inline] public this(float x, float y, float z)
         {
             this.x = x;
             this.y = y;
@@ -28,7 +29,7 @@ namespace BeefMakerEngine
             this.w = 0;
         }
 
-        public this(float x, float y)
+        [Inline] public this(float x, float y)
         {
             this.x = x;
             this.y = y;

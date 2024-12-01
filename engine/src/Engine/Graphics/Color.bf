@@ -19,6 +19,16 @@ namespace BeefMakerEngine
 
         public static operator float*(ref Color a) => &a.r;
 
+        public static implicit operator float[4](Color a)
+        {
+            return .(a.r, a.g, a.b, a.a);
+        }
+
+        public static implicit operator Color(float[4] a)
+        {
+            return .(a[0], a[1], a[2], a[3]);
+        }
+
         /// <summary>
         /// Convert HSV to RGB
         /// h is from 0-360

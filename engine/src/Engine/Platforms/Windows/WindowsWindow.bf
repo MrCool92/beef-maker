@@ -11,9 +11,18 @@ namespace BeefMakerEngine
         private static bool vsyncEnabled;
 
         private GlfwWindow* window;
-        private delegate void(GlfwWindow* window, int width, int height) framebufferResizeCallbackDelegate = new => FramebufferResizeCallback;
 
-        public override bool Init()
+        private WindowData windowData;
+
+        public struct WindowData
+        {
+            public String name;
+            public int width;
+            public int height;
+            public bool vsync;
+        }
+
+        public override bool Initialize()
         {
             if (!Glfw.Init())
             {
@@ -50,16 +59,11 @@ namespace BeefMakerEngine
             Glfw.WindowHint(.ContextVersionMinor, 3);
 
             window = Glfw.CreateWindow(windowWidth, windowHeight, Engine.windowTitle, null, null);
+            Glfw.SetWindowUserPointer(window, &windowData);
 
             Glfw.MakeContextCurrent(window);
             GL.Init( => Glfw.GetProcAddress);
-            Glfw.SetFramebufferSizeCallback(window, framebufferResizeCallbackDelegate);
-
-            // Set key callback
-            /*Glfw.SetKeyCallback(window, new (window, key, scancode, action, mods) => {
-                if (key == .Escape && action == .Press)
-                    Glfw.SetWindowShouldClose(window, true);
-            });*/
+            Glfw.SetFramebufferSizeCallback(window, new => FramebufferResizeCallback);
 
             // Show window
             Glfw.ShowWindow(window);
@@ -182,6 +186,10 @@ namespace BeefMakerEngine
 
         private void FramebufferResizeCallback(GlfwWindow* window, int width, int height)
         {
+            var windowData = (WindowData*)Glfw.GetWindowUserPointer(window);
+            windowData.width = width;
+            windowData.height = height;
+            OnWindowResize(width, height);
         }
     }
 }

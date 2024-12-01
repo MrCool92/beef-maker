@@ -2,6 +2,7 @@ using System;
 
 namespace BeefMakerEngine
 {
+    [UnderlyingArray(typeof(float), 3, true)]
     public struct Vector3
     {
         public readonly static Vector3 zero 	= .(0f,  0f,  0f);
@@ -17,14 +18,14 @@ namespace BeefMakerEngine
         public float y;
         public float z;
 
-        public this(float x, float y, float z)
+        [Inline] public this(float x, float y, float z)
         {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
-        public this(float x, float y)
+        [Inline] public this(float x, float y)
         {
             this.x = x;
             this.y = y;
@@ -94,5 +95,15 @@ namespace BeefMakerEngine
         public static bool operator !=(Vector3 a, Vector3 b) => !(a == b);
 
         public static operator float*(ref Vector3 a) => &a.x;
+
+        public static implicit operator float[3](Vector3 a)
+        {
+            return .(a.x, a.y, a.z);
+        }
+
+        public static implicit operator Vector3(float[3] a)
+        {
+            return .(a[0], a[1], a[2]);
+        }
     }
 }

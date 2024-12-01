@@ -11,7 +11,6 @@ namespace BeefMakerEditor
             name = "Game View";
 
             boxObject = new Box();
-            boxObject.position = .(0, 0, 10);
         }
 
         protected override void OnUpdate()

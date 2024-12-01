@@ -2,6 +2,7 @@ using System;
 
 namespace BeefMakerEngine
 {
+    [UnderlyingArray(typeof(float), 2, true)]
     public struct Vector2
     {
         public readonly static Vector2 zero  = .(0f,  0f);
@@ -14,7 +15,7 @@ namespace BeefMakerEngine
         public float x;
         public float y;
 
-        public this(float x, float y)
+        [Inline] public this(float x, float y)
         {
             this.x = x;
             this.y = y;
@@ -73,8 +74,5 @@ namespace BeefMakerEngine
         public static bool operator !=(Vector2 a, Vector2 b) => !(a == b);
 
         public static operator float*(ref Vector2 a) => &a.x;
-
-        public static operator Vector2(ref ImGui.ImGui.Vec2 a) => .(a.x, a.y);
-        public static operator ImGui.ImGui.Vec2(ref Vector2 a) => .(a.x, a.y);
     }
 }
