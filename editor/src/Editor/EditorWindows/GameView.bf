@@ -6,14 +6,15 @@ namespace BeefMakerEditor
     {
         private Box boxObject ~ delete _;
 
-        public this()
+        public override void OnEnable()
         {
-            name = "Game View";
+            base.OnEnable();
 
+            name = "Game View";
             boxObject = new Box();
         }
 
-        protected override void OnUpdate()
+        public override void OnUpdate()
         {
             if (Input.GetKey(.W))
                 boxObject.Move(.(0, 1, 0));
@@ -49,9 +50,9 @@ namespace BeefMakerEditor
                 camera.Move(.(1, 0, 0));
         }
 
-        protected override void OnRender()
+        public override void RenderView()
         {
-            GL.glClearColor(1f, 1f, 1f, 1f);
+            GL.glClearColor(0.8f, 0.8f, 0.8f, 1f);
             GL.glClear(GL.GL_COLOR_BUFFER_BIT);
             boxObject.Render(camera);
         }

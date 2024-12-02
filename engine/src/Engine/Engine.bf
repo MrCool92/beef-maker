@@ -12,11 +12,15 @@ namespace BeefMakerEngine
         private ModuleStack moduleStack ~ delete _;
         private bool isRunning;
 
+        delegate void(int width, int height) onWindowResize ~ delete _;
+
         public bool Initialize(String[] args, params Module[] modules)
         {
             time = new Time();
             window = new WindowsWindow();
-            window.OnWindowResize.Add(new => OnWindowResize);
+
+            onWindowResize = new => OnWindowResize;
+            window.OnWindowResize.Add(onWindowResize);
 
             if (!window.Initialize())
                 return false;
@@ -27,32 +31,28 @@ namespace BeefMakerEngine
 
             moduleStack = new ModuleStack();
             for (var module in modules)
-            {
                 moduleStack.Push(module);
-            }
 
             isRunning = true;
             return true;
         }
 
-        public ~this()
-        {
-            window.Shutdown();
-        }
-
         public void Run()
         {
             while (isRunning)
-            {
                 Logic();
-            }
+
+            for (var m in moduleStack)
+                m.OnDisable();
+
+            window.OnWindowResize.Remove(onWindowResize);
+            window.Shutdown();
         }
 
         private void Logic()
         {
             double nextFixedTime = 0;
 
-            Debug.Log(Time.DeltaTime);
             time.Update();
             TransformSystem.Update();
 

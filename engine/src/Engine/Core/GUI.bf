@@ -48,5 +48,51 @@ namespace BeefMakerEngine
             ImGui.EndGroup();
             return valueChanged;
         }
+
+        public static bool Vector3Field(char8* label, ref Vector3 value, char8* format = "%.3f", float labelWidth = 100f)
+        {
+            bool valueChanged = false;
+
+            ImGui.PushID(label);
+            ImGui.Columns(2, null, false);
+            ImGui.SetColumnWidth(0, labelWidth);
+
+            ImGui.Text(label);
+
+            ImGui.NextColumn();
+
+            ImGui.PushMultiItemsWidths(3, ImGui.CalcItemWidth());
+
+            ImGui.PushStyleColor(.FrameBg, .(1f, 0f, 0f, 0.4f));
+            ImGui.PushStyleColor(.Border, .(1f, 0f, 0f, 0.8f));
+            ImGui.PushStyleColor(.FrameBgActive, .(1f, 0f, 0f, 0.6f));
+            ImGui.PushStyleColor(.FrameBgHovered, .(1f, 0f, 0f, 0.5f));
+            valueChanged |= ImGui.DragFloat("##x", &value.x, 0.1f, 0f, 0f, "%.2f");
+            ImGui.PopStyleColor(4);
+            ImGui.PopItemWidth();
+
+            ImGui.SameLine();
+            ImGui.PushStyleColor(.FrameBg, .(0f, 1f, 0f, 0.4f));
+            ImGui.PushStyleColor(.Border, .(0f, 1f, 0f, 0.8f));
+            ImGui.PushStyleColor(.FrameBgActive, .(0f, 1f, 0f, 0.6f));
+            ImGui.PushStyleColor(.FrameBgHovered, .(0f, 1f, 0f, 0.5f));
+            valueChanged |= ImGui.DragFloat("##Y", &value.y, 0.1f, 0f, 0f, "%.2f");
+            ImGui.PopStyleColor(4);
+            ImGui.PopItemWidth();
+
+            ImGui.SameLine();
+            ImGui.PushStyleColor(.FrameBg, .(0f, 0f, 1f, 0.4f));
+            ImGui.PushStyleColor(.Border, .(0f, 0f, 1f, 0.8f));
+            ImGui.PushStyleColor(.FrameBgActive, .(0f, 0f, 1f, 0.6f));
+            ImGui.PushStyleColor(.FrameBgHovered, .(0f, 0f, 1f, 0.5f));
+            valueChanged |= ImGui.DragFloat("##Z", &value.z, 0.1f, 0f, 0f, "%.2f");
+            ImGui.PopStyleColor(4);
+            ImGui.PopItemWidth();
+
+            ImGui.Columns(1);
+            ImGui.PopID();
+
+            return valueChanged;
+        }
     }
 }

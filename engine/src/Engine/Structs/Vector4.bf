@@ -2,7 +2,6 @@ using System;
 
 namespace BeefMakerEngine
 {
-    [UnderlyingArray(typeof(float), 4, true)]
     public struct Vector4
     {
         public readonly static Vector4 zero = .(0f,  0f,  0f, 0f);

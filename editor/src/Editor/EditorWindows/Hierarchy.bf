@@ -8,16 +8,18 @@ namespace BeefMakerEditor
     public static class Selection
     {
         public static List<GameObject> selected = new .() ~ delete _;
+
+        public static Event<delegate void()> OnSelectionChanged = default;
     }
 
-    public class Hierarchy : EditorWindow
+    public class Hierarchy : Editor
     {
         public this()
         {
             name = "Scene Hierarchy";
         }
 
-        protected override void OnImGUI()
+        public override void OnImGUI()
         {
             static ImGui.TreeNodeFlags treeNodeFlags = .OpenOnArrow | .SpanFullWidth;
 
@@ -30,7 +32,10 @@ namespace BeefMakerEditor
         private void DrawNode(GameObject gameObject, ImGui.TreeNodeFlags treeNodeFlags)
         {
             System.Diagnostics.Debug.Assert(gameObject != null, "gameObject is null!");
-            System.Diagnostics.Debug.Assert(String.IsNullOrEmpty(gameObject.name), "gameObject.name is null or empty!");
+
+            var name = scope String(256);
+            gameObject.GetName(name);
+            System.Diagnostics.Debug.Assert(!String.IsNullOrEmpty(name), "gameObject.name is null or empty!");
 
             var nodeFlags = treeNodeFlags;
 
@@ -38,7 +43,7 @@ namespace BeefMakerEditor
                 nodeFlags |= .Selected;
 
             ImGui.PushID(scope String(gameObject.GetHashCode()));
-            bool opened = ImGui.TreeNodeEx("", nodeFlags, gameObject.name);
+            bool opened = ImGui.TreeNodeEx("GameObject", nodeFlags, name);
 
             if (ImGui.IsItemClicked())
             {
@@ -46,6 +51,8 @@ namespace BeefMakerEditor
                     Selection.selected.Clear();
 
                 Selection.selected.Add(gameObject);
+
+                Selection.OnSelectionChanged();
             }
 
             if (opened)

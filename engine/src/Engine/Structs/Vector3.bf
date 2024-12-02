@@ -2,7 +2,6 @@ using System;
 
 namespace BeefMakerEngine
 {
-    [UnderlyingArray(typeof(float), 3, true)]
     public struct Vector3
     {
         public readonly static Vector3 zero 	= .(0f,  0f,  0f);
@@ -93,8 +92,6 @@ namespace BeefMakerEngine
         }
 
         public static bool operator !=(Vector3 a, Vector3 b) => !(a == b);
-
-        public static operator float*(ref Vector3 a) => &a.x;
 
         public static implicit operator float[3](Vector3 a)
         {

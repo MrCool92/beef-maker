@@ -2,7 +2,6 @@ using System;
 
 namespace BeefMakerEngine
 {
-    [UnderlyingArray(typeof(float), 4, true)]
     public struct Quaternion
     {
         public static readonly Quaternion identity = .(0f, 0f, 0f, 1f);

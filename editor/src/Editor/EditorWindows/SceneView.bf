@@ -4,53 +4,52 @@ using System;
 
 namespace BeefMakerEditor
 {
-    public class SceneView : EditorWindow
+    public class SceneView : Editor
     {
         private RenderTexture renderTexture ~ delete _;
 
         private Vector2 lastWindowSize;
         private Vector2 windowSize;
 
-        public Event<delegate void()> OnGameWindowSizeChanged;
-
         public Camera camera;
 
-        public this()
+        public override void OnEnable()
         {
             name = "Scene View";
+
+            renderTexture = new RenderTexture(640, 480);
         }
 
-        private void UpdateInternal()
+        public override void OnRender()
         {
-            if (renderTexture == null || (lastWindowSize.x != windowSize.x || lastWindowSize.y != windowSize.y))
+            /*if (renderTexture == null || (lastWindowSize.x != windowSize.x || lastWindowSize.y != windowSize.y))
             {
                 lastWindowSize = windowSize;
                 camera.aspectRatio = lastWindowSize.x / lastWindowSize.y;
                 delete renderTexture;
                 renderTexture = new RenderTexture((int)lastWindowSize.x, (int)lastWindowSize.y);
-            }
-            OnUpdate();
-        }
+            }*/
 
-        private void RenderInternal()
-        {
             renderTexture.Bind();
-            OnRender();
+            RenderView();
             renderTexture.Unbind();
         }
 
-        protected virtual void OnRender()
+        public virtual void RenderView()
         {
         }
 
-        protected override void OnImGUI()
+        public override void OnImGUI()
         {
-            ImGui.BeginChild("Render");
+            if (renderTexture.Ready)
             {
+                ImGui.BeginChild("Render");
+
                 windowSize = ImGui.GetWindowSize();
-                ImGui.Image(renderTexture.TextureId, windowSize, ImGui.Vec2(0, 1), ImGui.Vec2(1, 0));
+                ImGui.Image(renderTexture.TextureId, windowSize, .(0, 1), .(1, 0));
+
+                ImGui.EndChild();
             }
-            ImGui.EndChild();
         }
     }
 }

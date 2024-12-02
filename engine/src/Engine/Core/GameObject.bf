@@ -5,7 +5,7 @@ namespace BeefMakerEngine
 {
     public class GameObject : IHashable
     {
-        public String name;
+        private String name = new String(256) ~ delete _;
 
         private List<Component> components = new .() ~ delete _;
 
@@ -17,31 +17,27 @@ namespace BeefMakerEngine
 
         private static int nextId;
 
-        public static GameObject Instantiate(String name = "GameObject", Scene scene = null)
+        public this(StringView name)
         {
-            var gameObject = new GameObject(name);
-            if (scene == null)
-            {
-                SceneManager.activeScene.MoveGameObject(gameObject);
-            }
-            else
-            {
-                scene.MoveGameObject(gameObject);
-            }
-            return gameObject;
-        }
-
-        public this(String name)
-        {
-            this.name = name;
+            SetName(name);
             transform = AddComponent<Transform>();
             id = nextId++;
         }
 
         public ~this()
         {
-            for (var component in components)
-                delete component;
+            for (var c in components)
+                delete c;
+        }
+
+        public void GetName(String strBuffer)
+        {
+            strBuffer.Append(name);
+        }
+
+        public void SetName(StringView newName)
+        {
+            name.Set(newName);
         }
 
         public TComponent AddComponent<TComponent>()
@@ -65,5 +61,19 @@ namespace BeefMakerEngine
         }
 
         public int GetHashCode() => id;
+
+        public static GameObject Instantiate(StringView name = "GameObject", Scene scene = null)
+        {
+            var gameObject = new GameObject(name);
+            if (scene == null)
+            {
+                SceneManager.activeScene.MoveGameObject(gameObject);
+            }
+            else
+            {
+                scene.MoveGameObject(gameObject);
+            }
+            return gameObject;
+        }
     }
 }

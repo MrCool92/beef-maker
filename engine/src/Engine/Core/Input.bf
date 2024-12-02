@@ -7,14 +7,14 @@ namespace BeefMakerEngine
     {
         private static Window window;
 
-        private static Dictionary<KeyCode, KeyState> keyStates;
+        private static Dictionary<KeyCode, KeyState> keyStates ~ delete _;
 
         public static void Initialize(Window window)
         {
             Input.window = window;
 
             keyStates = new Dictionary<KeyCode, KeyState>();
-            for (var key in Enum.GetEnumerator(typeof(KeyCode)))
+            for (var key in Enum.GetEnumerator<KeyCode>())
             {
                 keyStates.Add((KeyCode)key.value, .None);
             }

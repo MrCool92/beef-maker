@@ -60,6 +60,7 @@ namespace BeefMakerEngine
 
             window = Glfw.CreateWindow(windowWidth, windowHeight, Engine.windowTitle, null, null);
             Glfw.SetWindowUserPointer(window, &windowData);
+            Glfw.SetWindowSizeLimits(window, 640, 480, int.MaxValue, int.MaxValue);
 
             Glfw.MakeContextCurrent(window);
             GL.Init( => Glfw.GetProcAddress);
@@ -128,9 +129,14 @@ namespace BeefMakerEngine
         {
             Glfw.PollEvents();
 
-            for (var keyValue in Enum.GetValues(typeof(KeyCode)))
+            if (ImGui.IsAnyItemActive() && ImGui.IsWindowFocused(.AnyWindow))
             {
-                if (keyValue == -1)
+                return;
+            }
+
+            for (var keyValue in Enum.GetValues<KeyCode>())
+            {
+                if (keyValue == (KeyCode)(-1))
                     continue;
 
                 var action = Glfw.GetKey(window, (GLFW.GlfwInput.Key)keyValue);

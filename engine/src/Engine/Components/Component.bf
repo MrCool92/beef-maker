@@ -4,7 +4,7 @@ namespace BeefMakerEngine
     {
         public GameObject gameObject { get; private set; }
 
-        public virtual void OnImGui()
+        public ~this()
         {
         }
     }

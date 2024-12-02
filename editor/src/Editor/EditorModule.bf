@@ -11,12 +11,6 @@ namespace BeefMakerEditor
 
         private Camera camera ~ delete _;
 
-        private Hierarchy hierarchy ~ delete _;
-        private GameView gameView ~ delete _;
-        private Inspector inspector;
-
-        private List<EditorWindow> editorWindows ~ delete _;
-
         private static uint32 dockspaceId;
 
         public override void OnEnable()
@@ -25,21 +19,17 @@ namespace BeefMakerEditor
 
             camera = new Camera(Vector3.zero, .(0, 0, 1), Vector3.up);
 
-            editorWindows = new List<EditorWindow>();
+            Editor.Create<Hierarchy>();
+            Editor.Create<Inspector>();
+            Editor.Create<BeefMakerEditor.Console>();
 
-            hierarchy = new Hierarchy();
-            editorWindows.Add(hierarchy);
-
-            gameView = new GameView();
+            var gameView = Editor.Create<GameView>();
             gameView.camera = camera;
-            editorWindows.Add(gameView);
-
-            inspector = new Inspector();
-            editorWindows.Add(inspector);
         }
 
         public override void OnDisable()
         {
+            Editor.Disable();
         }
 
         public override void OnFixedUpdate()
@@ -48,12 +38,12 @@ namespace BeefMakerEditor
 
         public override void OnUpdate()
         {
-            gameView.[Friend]UpdateInternal();
+            Editor.Update();
         }
 
         public override void OnRender()
         {
-            gameView.[Friend]RenderInternal();
+            Editor.Render();
         }
 
         public override void OnImGUI()
@@ -65,9 +55,7 @@ namespace BeefMakerEditor
             if (showDemoWindow)
                 ImGui.ShowDemoWindow(&showDemoWindow);
 
-            hierarchy.[Friend]ImGUIInternal();
-            gameView.[Friend]ImGUIInternal();
-            inspector.[Friend]ImGUIInternal();
+            Editor.ImGui();
         }
 
         private void Clear()
@@ -108,14 +96,16 @@ namespace BeefMakerEditor
                     var size = ImGui.GetWindowSize();
 
                     // Split the dockspace into regions
-                    ImGui.ID leftDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Left, 0.5f, ?, out dockspaceId);
                     ImGui.ID rightDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Right, 0.5f, ?, out dockspaceId);
+                    ImGui.ID bottomLeftDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Down, 0.35f, ?, out dockspaceId);
+                    ImGui.ID leftDockId = ImGui.DockBuilderSplitNode(dockspaceId, ImGui.Dir.Left, 0.5f, ?, out dockspaceId);
 
                     // Dock windows to specific regions
                     ImGui.DockBuilderDockWindow("Scene Hierarchy", leftDockId);
                     ImGui.DockBuilderDockWindow("Inspector", rightDockId);
                     ImGui.DockBuilderDockWindow("Dear ImGui Demo", rightDockId);
                     ImGui.DockBuilderDockWindow("Game View", dockspaceId);
+                    ImGui.DockBuilderDockWindow("Console", bottomLeftDockId);
 
                     ImGui.DockBuilderSetNodeSize(leftDockId, .(size.x * 0.2f, size.y));
                     ImGui.DockBuilderSetNodeSize(rightDockId, .(size.x * 0.2f, size.y));
@@ -154,7 +144,7 @@ namespace BeefMakerEditor
             let error = GL.glGetError();
             if (error != GL.GL_NO_ERROR)
             {
-                Console.WriteLine($"[OpenGL_Error] {error} in {file} at {member}:{line}");
+                System.Console.WriteLine($"[OpenGL_Error] {error} in {file} at {member}:{line}");
                 return false;
             }
             return true;

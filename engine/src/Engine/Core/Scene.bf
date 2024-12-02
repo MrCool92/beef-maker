@@ -7,6 +7,20 @@ namespace BeefMakerEngine
     {
         private List<GameObject> rootObjects = new .() ~ delete _;
 
+        public ~this()
+        {
+            void TraverseBottomUp(Transform root)
+            {
+                for (var child in root)
+                    TraverseBottomUp(child);
+
+                delete root.gameObject;
+            }
+
+            for (var child in rootObjects)
+                TraverseBottomUp(child.transform);
+        }
+
         public void MoveGameObject(GameObject gameObject)
         {
             gameObject.[Friend]scene = this;
@@ -14,7 +28,12 @@ namespace BeefMakerEngine
             rootObjects.Add(gameObject);
         }
 
-        public struct Enumerator : IRefEnumerator<GameObject*>, IEnumerator<GameObject>, IResettable
+        public List<GameObject>.Enumerator GetEnumerator()
+        {
+            return rootObjects.GetEnumerator();
+        }
+
+        /*public struct Enumerator : IRefEnumerator<GameObject*>, IEnumerator<GameObject>, IResettable
         {
             private List<GameObject> objects;
 
@@ -24,9 +43,9 @@ namespace BeefMakerEngine
 
             public ref GameObject CurrentRef => ref objects[index];
 
-            public this(List<GameObject> objects)
+            public this(Scene scene)
             {
-                this.objects = objects;
+                this.objects = scene.rootObjects;
             }
 
             public Result<GameObject> GetNext() mut
@@ -54,9 +73,9 @@ namespace BeefMakerEngine
             }
         }
 
-        public IEnumerator<GameObject> GetEnumerator()
+        public Enumerator GetEnumerator()
         {
-            return new box Enumerator(rootObjects);
-        }
+            return Enumerator(this);
+        }*/
     }
 }

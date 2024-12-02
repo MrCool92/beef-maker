@@ -24,17 +24,5 @@ namespace BeefMakerEngine
 
             material.shader.Unbind();
         }
-
-        public override void OnImGui()
-        {
-            // Color
-            ImGui.PushID("Color");
-            float[4] color = this.color;
-            if (ImGui.ColorEdit4("Color", color))
-            {
-                this.color = color;
-            }
-            ImGui.PopID();
-        }
     }
 }

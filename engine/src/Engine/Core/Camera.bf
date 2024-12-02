@@ -6,18 +6,21 @@ namespace BeefMakerEngine
         public Vector3 target;
         public Vector3 up;
 
-        public float fov = 60f;
-        public float aspectRatio = 16f / 9f;
-        public float nearClip = 0.3f;
-        public float farClip = 1000f;
-
-        private RenderTexture renderTexture ~ delete _;
+        public float fov;
+        public float aspectRatio;
+        public float nearClip;
+        public float farClip;
 
         public this(Vector3 position, Vector3 target, Vector3 up)
         {
             this.position = position;
             this.target = target;
             this.up = up;
+
+            fov = 60f;
+            aspectRatio = 16f / 9f;
+            nearClip = 0.3f;
+            farClip = 1000f;
         }
 
         public Matrix4x4 GetViewMatrix()
